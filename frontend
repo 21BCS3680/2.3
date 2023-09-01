@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Message Storage</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.3.0/dist/web3.min.js"></script>
+</head>
+<body>
+    <h1>Message Storage</h1>
+    
+    <p>Current Message: <span id="message"></span></p>
+
+    <input type="text" id="newMessage" placeholder="Enter a new message">
+    <button onclick="setMessage()">Set Message</button>
+
+    <br><br>
+
+    <button onclick="getMessage()">Get Message</button>
+
+    <script>
+        // Initialize Web3.js with an Ethereum provider (e.g., MetaMask)
+        if (typeof web3 !== 'undefined') {
+            web3 = new Web3(web3.currentProvider);
+        } else {
+            // Handle the case where the user doesn't have an Ethereum provider
+            alert("Please install MetaMask or use an Ethereum-compatible browser.");
+        }
+
+        // Set the contract address and ABI (Application Binary Interface)
+        const contractAddress = 'YOUR_CONTRACT_ADDRESS'; // Replace with your contract address
+        const contractABI = [
+            {
+                "constant": false,
+                "inputs": [{"name": "_newMessage", "type": "string"}],
+                "name": "setMessage",
+                "outputs": [],
+                "payable": false,
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "constant": true,
+                "inputs": [],
+                "name": "getMessage",
+                "outputs": [{"name": "", "type": "string"}],
+                "payable": false,
+                "stateMutability": "view",
+                "type": "function"
+            }
+        ];
+
+        // Create a contract instance
+        const contract = new web3.eth.Contract(contractABI, contractAddress);
+
+        // Function to set a new message
+        function setMessage() {
+            const newMessage = document.getElementById('newMessage').value;
+
+            contract.methods.setMessage(newMessage).send({from: web3.eth.accounts[0]}, function(error, result) {
+                if (!error) {
+                    console.log("Transaction successful. Transaction hash: " + result);
+                } else {
+                    console.error(error);
+                }
+            });
+        }
+
+        // Function to get the current message
+        function getMessage() {
+            contract.methods.getMessage().call(function(error, result) {
+                if (!error) {
+                    document.getElementById('message').textContent = result;
+                } else {
+                    console.error(error);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
